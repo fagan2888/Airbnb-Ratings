@@ -2,13 +2,14 @@
 
 # adapted from https://github.com/foxbook/atap/blob/master/snippets/ch02/reader.py
 
-from nltk import sent_tokenize, wordpunct_tokenize, pos_tag, FreqDist, download
+from nltk import sent_tokenize, wordpunct_tokenize, pos_tag, FreqDist, download, stem
 download('punkt')
 download('averaged_perceptron_tagger')
 import os
 import psycopg2
 import urllib.parse as up
 import time
+import string
 
 
 testdata = ['We love living in Columbia Heights. Our house is minutes by foot from loads of local restaurants and an easy metro ride to all the DC tourist sites. Our Airbnb space is a comfy, cozy suite on the third floor of our house. We live in the house, but the third floor is all yours. We like to give you to your privacy but are available as needed for questions and help. Welcome! Our Airbnb guest suite is the third floor of our charming Victorian home in Columbia Heights -- a bustling, revitalized historic Washington D.C. neighborhood with a wide variety of restaurants and shopping -- all just 15 minutes to the monuments and museums via the Columbia Heights or Georgia Ave metro stops, both just a few blocks away. Accommodations include one bedroom, one bath, and a large combined kitchenette/living room. Bedroom has queen-sized bed, desk, dresser and large closet. Living area is furnished with a futon and a couch, one of which can accommodate a third person. The en suite bathroom features a cla',
@@ -58,6 +59,20 @@ class PostgresCorpusReader(object):
             for token in wordpunct_tokenize(sentence):
                 yield token
 
+    def tokenize_strip_punct(self, sent):
+        stemmer = stem.SnowballStemmer('english')
+        for token in wordpunct_tokenize(sent):
+            if token in string.punctuation: continue
+            yield stemmer.stem(token)
+
+
+    def words_by_desc(self):
+        for desc in self.texts():
+            yield [
+                self.tokenize_strip_punct(sent)
+                for sent in sent_tokenize(desc)
+            ]
+
     def tokenize(self):
         for desc in self.texts():
             yield [
@@ -83,6 +98,7 @@ class PostgresCorpusReader(object):
 
 
 if __name__ == '__main__':
-    print('doing some preprocessing!')
-    cr = PostgresCorpusReader()
-    print(cr.describe())
+    from vectorizer import Vectorizer
+    vec = Vectorizer()
+    for vector in vec.tf_idf():
+        print(vector)
