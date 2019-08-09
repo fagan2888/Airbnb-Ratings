@@ -43,10 +43,24 @@ class TableReader(object):
         geo = sqlio.read_sql_query(sql, self.conn)
         return geo;
 
+    def geodata_vector(self):
+        gv = self.geodata()
+        # all these columns are 99% the same value
+        gv = gv.drop(columns=['street', 'city', 'state', 'smart_location', 'country']);
+        gv['neighborhood'] = gv["neighborhood"].astype('category')
+        gv["neighborhood"] = gv["neighborhood"].cat.codes
+        return gv
+
     def reviews(self):
         sql = 'SELECT "listingID", num_reviews, rating, accuracy, cleanliness, checkin, communication, location, value FROM public."Reviews";'
         revs = sqlio.read_sql_query(sql, self.conn)
         return revs;
+
+    def reviews_vector(self):
+        rv = self.reviews();
+        for col in ['rating', 'accuracy', 'cleanliness', 'checkin', 'communication', 'location', 'value']:
+            rv[col].fillna(rv[col].mean(), inplace=True)
+        return rv;
 
     def close(self):
         self._cur.close()
@@ -55,6 +69,6 @@ class TableReader(object):
 
 if __name__ == '__main__':
     rdr = TableReader()
-    df = rdr.properties();
+    df = rdr.reviews_vector();
     print(df.head())
     rdr.close()
