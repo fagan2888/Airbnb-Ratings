@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 # adapted from https://github.com/foxbook/atap/blob/master/snippets/ch02/reader.py
-import os
 import psycopg2
 import urllib.parse as up
 import pandas.io.sql as sqlio
 import pandas as pd
+import json
 
 def parse_amenities(amenities):
     drop_last = amenities[len(amenities) - 1] != '}'
@@ -21,7 +21,10 @@ class TableReader(object):
     def __init__(self):
         up.uses_netloc.append("postgres")
 
-        url = up.urlparse(os.environ["DATABASE_URL"])
+        with open('config.json') as json_data_file:
+            url = json.load(json_data_file)['database_url']
+
+        url = up.urlparse(url)
 
         self.conn = psycopg2.connect(database=url.path[1:],
                                 user=url.username,

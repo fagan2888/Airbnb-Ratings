@@ -1,3 +1,9 @@
 # pycharm
 .idea
 __pycache__/
+
+#Ipython Notebook
+.ipynb_checkpoints
+
+#config file
+config.json
