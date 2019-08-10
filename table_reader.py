@@ -5,6 +5,7 @@ import os
 import psycopg2
 import urllib.parse as up
 import pandas.io.sql as sqlio
+import pandas as pd
 
 def parse_amenities(amenities):
     drop_last = amenities[len(amenities) - 1] != '}'
@@ -43,13 +44,16 @@ class TableReader(object):
 
     def properties_vector(self, include_amenitites = False):
         pv = self.properties()
-        # square_feet is mostly null
-        pv = pv.drop(columns=['square_feet'])
-        # label encode these columns
-        for col in ['property_type', 'room_type', 'bed_type']:
-            pv[col] = pv[col].astype('category')
-            pv[col] = pv[col].cat.codes
-        # fille in NaN/null
+        # square_feet is mostly null, bed_type is 99.9% real bead
+        pv = pv.drop(columns=['square_feet', 'bed_type'])
+        # encode these columns
+        for col in ['property_type', 'room_type']:
+            dummies = pd.get_dummies(pv[col]);
+            for dummy_col in dummies.columns:
+                if dummies[dummy_col].sum() > 100:
+                    pv[dummy_col] = dummies[dummy_col]
+            pv = pv.drop(columns=[col])
+         #fill in NaN/null
         for col in ['bathrooms', 'bedrooms', 'beds']:
             pv[col].fillna(pv[col].mean(), inplace=True)
 
@@ -61,7 +65,7 @@ class TableReader(object):
                     if len(amenity) > 0:
                         new_columns.add(amenity)
 
-            #make a dic with lists of 0/1 encodings
+            #make a dict with lists of 0/1 encodings
             amenities_dict = { key : list() for key in new_columns }
             for index, row in pv.iterrows():
                 row_amenities = parse_amenities(row['amenities'])
@@ -73,7 +77,8 @@ class TableReader(object):
 
             #iterate over dic, make a columns for each key, assign array value
             for key, value in amenities_dict.items():
-                pv[key] = value;
+                if sum(value) > 100:
+                    pv[key] = value;
             pv = pv.drop(columns=['amenities'])
         else:
             pv = pv.drop(columns=['amenities'])
@@ -93,9 +98,12 @@ class TableReader(object):
     def geodata_vector(self):
         gv = self.geodata()
         # all these columns are 99% the same value
-        gv = gv.drop(columns=['street', 'city', 'state', 'smart_location', 'country']);
-        gv['neighborhood'] = gv["neighborhood"].astype('category')
-        gv["neighborhood"] = gv["neighborhood"].cat.codes
+        gv = gv.drop(columns=['street', 'city', 'state', 'smart_location', 'country'])
+        dummies = pd.get_dummies(gv['neighborhood']);
+        for dummy_col in dummies.columns:
+            if dummies[dummy_col].sum() > 100:
+                gv[dummy_col] = dummies[dummy_col]
+        gv = gv.drop(columns=['neighborhood'])
         return gv
 
     def reviews(self):
