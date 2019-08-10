@@ -73,6 +73,7 @@ class TableReader(object):
             #iterate over dic, make a columns for each key, assign array value
             for key, value in amenities_dict.items():
                 pv[key] = value;
+            pv = pv.drop(columns=['amenities'])
         else:
             pv = pv.drop(columns=['amenities'])
 
