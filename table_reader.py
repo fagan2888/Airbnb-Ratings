@@ -49,6 +49,7 @@ class TableReader(object):
         for col in ['property_type', 'room_type', 'bed_type']:
             pv[col] = pv[col].astype('category')
             pv[col] = pv[col].cat.codes
+        # fille in NaN/null
         for col in ['bathrooms', 'bedrooms', 'beds']:
             pv[col].fillna(pv[col].mean(), inplace=True)
 
