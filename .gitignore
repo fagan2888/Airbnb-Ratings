@@ -1,6 +1,7 @@
 # pycharm
 .idea
 __pycache__/
+.DS_Store
 
 #Ipython Notebook
 .ipynb_checkpoints
