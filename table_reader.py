@@ -107,6 +107,7 @@ class TableReader(object):
             if dummies[dummy_col].sum() > 100:
                 gv[dummy_col] = dummies[dummy_col]
         gv = gv.drop(columns=['neighborhood'])
+        gv['zipcode'].fillna(gv['zipcode'].mean(), inplace=True)
         return gv
 
     def reviews(self):
