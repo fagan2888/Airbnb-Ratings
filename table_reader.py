@@ -119,6 +119,8 @@ class TableReader(object):
         rv = self.reviews()
         for col in ['rating', 'accuracy', 'cleanliness', 'checkin', 'communication', 'location', 'value']:
             rv[col].fillna(rv[col].mean(), inplace=True)
+        min_rating = 85
+        rv['rating'] = rv['rating'].where(rv['rating'] >= min_rating, min_rating)
         return rv
 
     def close(self):
