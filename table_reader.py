@@ -47,6 +47,8 @@ class TableReader(object):
 
     def properties_vector(self, include_amenitites = False):
         pv = self.properties()
+        # we consider these high-priced properties "luxury" outliers
+        pv = pv[pv['price'] < 400]
         # square_feet is mostly null, bed_type is 99.9% real bead
         pv = pv.drop(columns=['square_feet', 'bed_type'])
         # encode these columns
