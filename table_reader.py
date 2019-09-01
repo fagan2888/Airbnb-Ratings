@@ -6,6 +6,7 @@ import urllib.parse as up
 import pandas.io.sql as sqlio
 import pandas as pd
 import json
+import os
 
 def parse_amenities(amenities):
     drop_last = amenities[len(amenities) - 1] != '}'
@@ -20,8 +21,8 @@ def parse_amenities(amenities):
 class TableReader(object):
     def __init__(self):
         up.uses_netloc.append("postgres")
-
-        with open('config.json') as json_data_file:
+        proj_root = os.path.dirname(os.path.abspath(__file__))
+        with open(proj_root + '/config.json') as json_data_file:
             url = json.load(json_data_file)['database_url']
 
         url = up.urlparse(url)
