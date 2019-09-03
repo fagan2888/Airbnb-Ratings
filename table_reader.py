@@ -63,9 +63,9 @@ class TableReader(object):
                 if dummies[dummy_col].sum() > 100:
                     pv[dummy_col] = dummies[dummy_col]
             pv = pv.drop(columns=[col])
-         #fill in NaN/null
-        for col in ['bathrooms', 'bedrooms', 'beds']:
-            pv[col].fillna(pv[col].mean(), inplace=True)
+
+         #drop NaN/null
+        pv.dropna(subset=['bathrooms','bedrooms','beds','bathrooms'], inplace = True)
 
         # one-hot encode amenities column
         if include_amenitites:
@@ -114,7 +114,7 @@ class TableReader(object):
             if dummies[dummy_col].sum() > 100:
                 gv[dummy_col] = dummies[dummy_col]
         gv = gv.drop(columns=['neighborhood'])
-        gv['zipcode'].fillna(gv['zipcode'].mean(), inplace=True)
+        gv.dropna(subset=['zipcode'], inplace=True)
         return gv
 
     def reviews(self):
