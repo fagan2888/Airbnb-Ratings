@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function, unicode_literals
-# adapted from https://github.com/foxbook/atap/blob/master/snippets/ch02/reader.py
-import psycopg2
-import urllib.parse as up
-import pandas.io.sql as sqlio
 import pandas as pd
-import json
-import os
-import regex
 from pyfiglet import Figlet
 from PyInquirer import prompt, style_from_dict, Token
 from PyInquirer import Validator, ValidationError
